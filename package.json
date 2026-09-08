@@ -1,0 +1,31 @@
+{
+  "name": "medclinic-api",
+  "version": "1.0.0",
+  "description": "API de gerenciamento de clinica medica - Etapa 1",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hagmayer1969/medclinic_api.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hagmayer1969/medclinic_api/issues"
+  },
+  "homepage": "https://github.com/Hagmayer1969/medclinic_api#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
