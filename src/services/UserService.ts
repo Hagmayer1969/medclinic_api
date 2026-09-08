@@ -3,6 +3,7 @@ import { CreateUserDTO } from "../dtos/CreateUserDTO";
 import { User, UserRole } from "../entities/User";
 import { isValidEmail } from "../utils/validators";
 import { AppError } from "../utils/AppError";
+import { hashPassword } from "../utils/hash";
 
 export class UserService {
   // Cadastra um novo usuario no sistema
@@ -31,10 +32,12 @@ export class UserService {
       throw new AppError("E-mail ja cadastrado", 409);
     }
 
+    const senhaCriptografada = await hashPassword(password);
+
     const user = UserRepository.create({
       name,
       email,
-      password,
+      password: senhaCriptografada,
       role: role || UserRole.ATENDENTE,
     });
 
