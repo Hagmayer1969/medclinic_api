@@ -71,4 +71,15 @@ export class UserService {
 
     return generateToken({ id: user.id, role: user.role });
   }
+
+  // Busca um usuario pelo id, usado no endpoint de perfil
+  async findById(id: string): Promise<User> {
+    const user = await UserRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new AppError("Usuario nao encontrado", 404);
+    }
+
+    return user;
+  }
 }
