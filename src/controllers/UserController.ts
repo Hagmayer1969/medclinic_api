@@ -1,14 +1,14 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/UserService";
-import { AppError } from "../utils/AppError";
 
 const userService = new UserService();
 
 export class UserController {
   // POST /auth/register
-  async register(req: Request, res: Response): Promise<void> {
+  async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { name, email, password, role } = req.body;
+      // Se o corpo nao vier, o service devolve o erro de campos obrigatorios
+      const { name, email, password, role } = req.body ?? {};
 
       const user = await userService.create({ name, email, password, role });
 
@@ -21,35 +21,26 @@ export class UserController {
         createdAt: user.createdAt,
       });
     } catch (error) {
-      if (error instanceof AppError) {
-        res.status(error.statusCode).json({ message: error.message });
-        return;
-      }
-
-      res.status(500).json({ message: "Erro interno do servidor" });
+      // Repassa o erro para o middleware central
+      next(error);
     }
   }
 
   // POST /auth/login
-  async login(req: Request, res: Response): Promise<void> {
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body ?? {};
 
       const token = await userService.login({ email, password });
 
       res.status(200).json({ token });
     } catch (error) {
-      if (error instanceof AppError) {
-        res.status(error.statusCode).json({ message: error.message });
-        return;
-      }
-
-      res.status(500).json({ message: "Erro interno do servidor" });
+      next(error);
     }
   }
 
   // GET /users/me
-  async me(req: Request, res: Response): Promise<void> {
+  async me(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // O authMiddleware ja validou o token e preencheu o req.user
       const userId = req.user!.id;
@@ -64,12 +55,7 @@ export class UserController {
         createdAt: user.createdAt,
       });
     } catch (error) {
-      if (error instanceof AppError) {
-        res.status(error.statusCode).json({ message: error.message });
-        return;
-      }
-
-      res.status(500).json({ message: "Erro interno do servidor" });
+      next(error);
     }
   }
 }

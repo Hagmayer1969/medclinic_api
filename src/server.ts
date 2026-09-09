@@ -3,6 +3,8 @@ import express from "express";
 import dotenv from "dotenv";
 import { AppDataSource } from "./database/data-source";
 import routes from "./routes";
+import { notFoundMiddleware } from "./middlewares/notFoundMiddleware";
+import { errorMiddleware } from "./middlewares/errorMiddleware";
 
 dotenv.config();
 
@@ -15,6 +17,12 @@ app.get("/health", (req, res) => {
 });
 
 app.use(routes);
+
+// Rota inexistente
+app.use(notFoundMiddleware);
+
+// Tratamento central de erros: precisa ser o ultimo middleware
+app.use(errorMiddleware);
 
 const PORT = Number(process.env.PORT) || 3000;
 
