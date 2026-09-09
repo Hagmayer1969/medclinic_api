@@ -1,9 +1,11 @@
 import { UserRepository } from "../repositories/UserRepository";
 import { CreateUserDTO } from "../dtos/CreateUserDTO";
+import { LoginDTO } from "../dtos/LoginDTO";
 import { User, UserRole } from "../entities/User";
 import { isValidEmail } from "../utils/validators";
 import { AppError } from "../utils/AppError";
-import { hashPassword } from "../utils/hash";
+import { hashPassword, comparePassword } from "../utils/hash";
+import { generateToken } from "../utils/jwt";
 
 export class UserService {
   // Cadastra um novo usuario no sistema
@@ -44,5 +46,29 @@ export class UserService {
     await UserRepository.save(user);
 
     return user;
+  }
+
+  // Faz o login e devolve o token de acesso
+  async login(data: LoginDTO): Promise<string> {
+    const { email, password } = data;
+
+    if (!email || !password) {
+      throw new AppError("E-mail e senha sao obrigatorios", 400);
+    }
+
+    const user = await UserRepository.findOneBy({ email });
+
+    // Mensagem generica de proposito, para nao entregar qual campo esta errado
+    if (!user) {
+      throw new AppError("E-mail ou senha invalidos", 401);
+    }
+
+    const senhaCorreta = await comparePassword(password, user.password);
+
+    if (!senhaCorreta) {
+      throw new AppError("E-mail ou senha invalidos", 401);
+    }
+
+    return generateToken({ id: user.id, role: user.role });
   }
 }
