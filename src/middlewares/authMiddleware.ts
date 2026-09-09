@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
+import { AppError } from "../utils/AppError";
 
-// Verifica se a requisicao tem um token JWT valido
+// Verifica se a requisicao tem um token JWT valido.
+// Os erros sao repassados para o middleware central de tratamento de erros.
 export function authMiddleware(
   req: Request,
   res: Response,
@@ -10,7 +12,7 @@ export function authMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    res.status(401).json({ message: "Token nao informado" });
+    next(new AppError("Token nao informado", 401));
     return;
   }
 
@@ -18,7 +20,7 @@ export function authMiddleware(
   const [scheme, token] = authHeader.split(" ");
 
   if (scheme !== "Bearer" || !token) {
-    res.status(401).json({ message: "Formato do token invalido" });
+    next(new AppError("Formato do token invalido", 401));
     return;
   }
 
@@ -31,10 +33,10 @@ export function authMiddleware(
     next();
   } catch (error) {
     if (error instanceof Error && error.name === "TokenExpiredError") {
-      res.status(401).json({ message: "Token expirado" });
+      next(new AppError("Token expirado", 401));
       return;
     }
 
-    res.status(401).json({ message: "Token invalido" });
+    next(new AppError("Token invalido", 401));
   }
 }
